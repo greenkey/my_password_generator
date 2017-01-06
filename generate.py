@@ -11,6 +11,21 @@ def is_easy_to_digit(s):
             return False
     return True
 
+def remove_from_dictionary(dictionary=DEFAULT_DICTIONARY_FILENAME):
+    with open(DEFAULT_DICTIONARY_FILENAME, 'r') as dictionary:
+        words = dictionary.read().split('\n')
+
+    newdict = set()
+    for word in words:
+        if is_easy_to_digit(word):
+            newdict.add(word)
+
+    with open(DEFAULT_DICTIONARY_FILENAME, 'w') as dictionary:
+        dictionary.write('\n'.join(newdict))
+
+    return ''
+
+
 def run(argv=None):
     dictionary_filename = DEFAULT_DICTIONARY_FILENAME
 
@@ -23,16 +38,7 @@ def run(argv=None):
                     fo.write(fi.read())
             return ''
         if 'remove_from_dictionary=hard_to_digit' in arg:
-            with open(DEFAULT_DICTIONARY_FILENAME, 'r') as dictionary:
-                words = dictionary.read().split('\n')
-            with open(DEFAULT_DICTIONARY_FILENAME, 'w') as dictionary:
-                newdict = set()
-                for word in words:
-                    if is_easy_to_digit(word):
-                        newdict.add(word)
-                dictionary.write('\n'.join(newdict))
-            return ''
-
+            return remove_from_dictionary(dictionary_filename)
     try:
         with open(dictionary_filename) as f:
             dictionary = f.read().split('\n')
