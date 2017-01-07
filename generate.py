@@ -46,8 +46,8 @@ def run(argv=None):
         return f'--Error: Dictionary file does not exists: {dictionary_filename}'
 
     words = set()
-    while len(words) < 4:
-        words.add(random.choice(dictionary))
+    while len(words) < 4 and len(dictionary) > 0:
+        words.add(dictionary.pop(random.randrange(len(dictionary))))
 
     return ' '.join(words)
 

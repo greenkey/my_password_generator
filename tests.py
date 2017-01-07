@@ -149,6 +149,17 @@ class TestRemoveFromDictUsingRules(unittest.TestCase):
         self.assertNotIn('hello', write_call_parameters)
         self.assertNotIn('useless', write_call_parameters)
 
+class TestBugfix(unittest.TestCase):
+
+    def test_does_not_infinite_loop_when_there_are_too_few_words(self):
+        m = mock_open(read_data='one\ntwo\nthree')
+
+        with patch('generate.open', m):
+            output = generate.run()
+
+        # TODO: I'm not really checking for an inifinite loop... currently I have no idea on how to implement the assert
+        self.assertEqual(3, len(output.split()))
+
 
 if __name__ == '__main__':
     unittest.main()
