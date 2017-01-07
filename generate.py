@@ -47,7 +47,9 @@ def run(argv=None):
 
     words = set()
     while len(words) < 4 and len(dictionary) > 0:
-        words.add(dictionary.pop(random.randrange(len(dictionary))))
+        word = dictionary.pop(random.randrange(len(dictionary))).strip()
+        if word:
+            words.add(word)
 
     return ' '.join(words)
 

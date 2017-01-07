@@ -160,6 +160,14 @@ class TestBugfix(unittest.TestCase):
         # TODO: I'm not really checking for an inifinite loop... currently I have no idea on how to implement the assert
         self.assertEqual(3, len(output.split()))
 
+    def test_never_output_empty_word(self):
+        file_content = 'one\ntwo\nthree' # three items to force selecting another item
+        m = mock_open(read_data=file_content+'\n \n') # adding empty items
+
+        with patch('generate.open', m):
+            output = generate.run()
+
+        self.assertEqual(len(file_content), len(output)) # cannot rely on matching the string, the output is random!
 
 if __name__ == '__main__':
     unittest.main()
