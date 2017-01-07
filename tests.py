@@ -71,6 +71,24 @@ class TestFunctional(PasswordGeneratorFT):
         os.remove(dict_file_name)
         os.remove(generate.DEFAULT_DICTIONARY_FILENAME)
 
+    def test_can_set_number_of_output_words(self):
+        # having a file with at least 10 words
+        m = mock_open(read_data='\n'.join(['word'+str(i) for i in range(10)]))
+
+        # Mr Battery wants to have a longest password with 6 words, then he executes the script
+        with patch('generate.open', m):
+            output = generate.run(['words=6'])
+
+        # the output actually contains 6 words
+        self.assertEqual(6, len(output.split()))
+
+        # then Mr Battery believe that it doesn't have so much memory
+        # so he decide to have a password with just one word
+        with patch('generate.open', m):
+            output = generate.run(['words=1'])
+
+        # and that's what he has
+        self.assertEqual(1, len(output.split()))
 
 
 class TestPasswordGenerator(unittest.TestCase):
@@ -153,6 +171,7 @@ class TestRemoveFromDictUsingRules(unittest.TestCase):
         self.assertIn('lake', write_call_parameters)
         self.assertNotIn('hello', write_call_parameters)
         self.assertNotIn('useless', write_call_parameters)
+
 
 class TestBugfix(unittest.TestCase):
 

@@ -13,6 +13,13 @@ The following command returns 4 random words from the linux english dictionary
 ```shell
 $ python3.6 generate.py dictionary=/usr/share/dict/british-english
 threaded putsches absinth slenderness
+
+## Output any number of words
+
+If you want a specific number of words, use the parameter `words`
+```shell
+$ python3.6 generate.py words=2
+flyleaves objections
 ```
 
 ## Import dictionaries

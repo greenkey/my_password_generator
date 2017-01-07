@@ -3,6 +3,7 @@
 import sys, random
 
 DEFAULT_DICTIONARY_FILENAME = 'dictionary.txt'
+DEFAULT_OUTPUT_WORD_COUNT = 4
 
 def is_easy_to_digit(s):
     s = s.strip().lower()
@@ -31,10 +32,14 @@ def format_error(error_text):
 
 def run(argv=None):
     dictionary_filename = DEFAULT_DICTIONARY_FILENAME
+    word_count = DEFAULT_OUTPUT_WORD_COUNT
 
     for arg in argv or []:
         if arg.startswith('dictionary='):
             dictionary_filename = arg.split('=')[1]
+        if arg.startswith('words='):
+            word_count = int(arg.split('=')[1])
+
         if arg.startswith('import='):
             try:
                 with open(arg.split('=')[1], 'r') as fi: #TODO: handle exception
@@ -52,7 +57,7 @@ def run(argv=None):
         return format_error(f'Dictionary file does not exists: {dictionary_filename}')
 
     words = set()
-    while len(words) < 4 and len(dictionary) > 0:
+    while len(words) < word_count and len(dictionary) > 0:
         word = dictionary.pop(random.randrange(len(dictionary))).strip()
         if word:
             words.add(word)
