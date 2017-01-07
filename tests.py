@@ -102,12 +102,17 @@ class TestImportDictionary(unittest.TestCase):
         m.set_return_value = 'file'
 
         with patch('generate.open', m):
-            generate.run(f'import=import_file_name'.split())
+            generate.run('import=import_file_name'.split())
 
         self.assertIn(call('import_file_name', 'r'), m.mock_calls)
         self.assertIn(call(generate.DEFAULT_DICTIONARY_FILENAME, 'a'), m.mock_calls)
         handle = m()
         self.assertIn(call('word1\nword2'), handle.write.mock_calls)
+
+    def test_error_when_import_file_not_exists(self):
+        self.assertIn('Import file does not exists', generate.run('import=i_do_not_exist'.split()))
+
+
 
 class TestRemoveFromDictUsingRules(unittest.TestCase):
 
