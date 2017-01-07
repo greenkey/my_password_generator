@@ -1,11 +1,23 @@
 #!/usr/bin/env python3.6
 
 import unittest
-from unittest.mock import patch, call, Mock, mock_open as mock_mock_open
+from unittest.mock import patch, call, Mock, mock_open
 from unittest import skip
 import tempfile, generate, os
 
-class TestFunctional(unittest.TestCase):
+class PasswordGeneratorFT(unittest.TestCase):
+
+    def setUp(self):
+        # saves current default dictionary
+        if os.path.isfile(generate.DEFAULT_DICTIONARY_FILENAME):
+            os.rename(generate.DEFAULT_DICTIONARY_FILENAME,generate.DEFAULT_DICTIONARY_FILENAME+'.bak_tests')
+
+    def tearDown(self):
+        # restore default dictionary
+        if os.path.isfile(generate.DEFAULT_DICTIONARY_FILENAME+'.bak_tests'):
+            os.rename(generate.DEFAULT_DICTIONARY_FILENAME+'.bak_tests',generate.DEFAULT_DICTIONARY_FILENAME)
+
+class TestFunctional(PasswordGeneratorFT):
 
     def test_can_generate_password_from_specific_filename(self):
         # Horse create a new file containing a lot of words
@@ -28,7 +40,7 @@ class TestFunctional(unittest.TestCase):
 
     def test_can_create_dictionary_from_other_file(self):
         try:
-            os.remove('dictionary.txt')
+            os.remove(generate.DEFAULT_DICTIONARY_FILENAME)
         except FileNotFoundError:
             pass
 
@@ -57,25 +69,26 @@ class TestFunctional(unittest.TestCase):
         self.assertNotIn('useless', output)
 
         os.remove(dict_file_name)
-        os.remove('dictionary.txt')
+        os.remove(generate.DEFAULT_DICTIONARY_FILENAME)
+
 
 
 class TestPasswordGenerator(unittest.TestCase):
 
     @patch('generate.open')
-    def test_uses_default_dictionary(self, mock_open):
-        mock_open.side_effect = FileNotFoundError()
+    def test_uses_default_dictionary(self, m_open):
+        m_open.side_effect = FileNotFoundError()
         generate.run()
-        self.assertEqual(mock_open.call_args[0], ('dictionary.txt',))
+        self.assertEqual(m_open.call_args[0], (generate.DEFAULT_DICTIONARY_FILENAME,))
         generate.run([])
-        self.assertEqual(mock_open.call_args[0], ('dictionary.txt',))
+        self.assertEqual(m_open.call_args[0], (generate.DEFAULT_DICTIONARY_FILENAME,))
 
     @patch('generate.open')
-    def test_uses_custom_dictionary(self, mock_open):
-        mock_open.side_effect = FileNotFoundError()
+    def test_uses_custom_dictionary(self, m_open):
+        m_open.side_effect = FileNotFoundError()
         args = ['dictionary=use_this_dictionary']
         generate.run(args)
-        self.assertEqual(mock_open.call_args[0], ('use_this_dictionary',))
+        self.assertEqual(m_open.call_args[0], ('use_this_dictionary',))
 
     def test_returns_error_if_dictionary_file_does_not_exists(self):
         args = ['dictionary=use_this_dictionary']
@@ -85,14 +98,14 @@ class TestPasswordGenerator(unittest.TestCase):
 class TestImportDictionary(unittest.TestCase):
 
     def test_import_from_another_dictionary_to_default_one(self):
-        m = mock_mock_open(read_data='word1\nword2') # TODO: mock_mock_open it's a very ugly name
+        m = mock_open(read_data='word1\nword2')
         m.set_return_value = 'file'
 
         with patch('generate.open', m):
             generate.run(f'import=import_file_name'.split())
 
         self.assertIn(call('import_file_name', 'r'), m.mock_calls)
-        self.assertIn(call('dictionary.txt', 'a'), m.mock_calls)
+        self.assertIn(call(generate.DEFAULT_DICTIONARY_FILENAME, 'a'), m.mock_calls)
         handle = m()
         self.assertIn(call('word1\nword2'), handle.write.mock_calls)
 
@@ -120,14 +133,14 @@ class TestRemoveFromDictUsingRules(unittest.TestCase):
         self.assertEqual(generate.is_easy_to_digit('pOoL'), False)
 
     def test_can_remove_hard_to_digit_words(self):
-        m = mock_mock_open(read_data='panama\npal\nwow\nlake\nhello\nuseless') # TODO: mock_mock_open it's a very ugly name
+        m = mock_open(read_data='panama\npal\nwow\nlake\nhello\nuseless')
 
         with patch('generate.open', m):
             generate.run(f'remove_from_dictionary=hard_to_digit'.split())
 
         handle = m()
-        self.assertIn(call('dictionary.txt', 'r'), m.mock_calls)
-        self.assertIn(call('dictionary.txt', 'w'), m.mock_calls)
+        self.assertIn(call(generate.DEFAULT_DICTIONARY_FILENAME, 'r'), m.mock_calls)
+        self.assertIn(call(generate.DEFAULT_DICTIONARY_FILENAME, 'w'), m.mock_calls)
         write_call_parameters = ' '.join([','.join(c[0]) for c in handle.write.call_args_list])
         self.assertIn('panama', write_call_parameters)
         self.assertIn('pal', write_call_parameters)
