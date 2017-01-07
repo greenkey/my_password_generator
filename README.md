@@ -35,7 +35,9 @@ penury Taiyuan decrees deplaned
 ## Remove hard-to-digit words from dictionary
 
 You can also remove the words that are difficult to digit.
+
 An easy-to-digit word is a word conaining letters that you have to digit alternatively with one hand and the other.
+
 Example: "panama" is a simple-digit word because you type the "p" with the right hand, the "a" with the left hand and so on: left-right-left-right...
 ```shell
 $ python3.6 generate.py remove_from_dictionary=hard_to_digit
